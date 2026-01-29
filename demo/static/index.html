@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upsample Anything Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Source+Serif+4:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Upsample Anything (GS-JBU + TTO)</h1>
+      <p>
+        Upload an image, optimize anisotropic kernels on RGB at test-time, then transfer the
+        same weights to feature upsampling (no value synthesis).
+      </p>
+    </header>
+    <main>
+      <aside>
+        <div class="control-group">
+          <label for="imageInput">Upload Image</label>
+          <input id="imageInput" type="file" accept="image/*" />
+        </div>
+        <div class="control-group">
+          <label for="resolution">Resolution</label>
+          <select id="resolution">
+            <option value="224">224</option>
+            <option value="256" selected>256</option>
+            <option value="384">384</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="stride">Stride</label>
+          <select id="stride">
+            <option value="8">8</option>
+            <option value="14">14</option>
+            <option value="16" selected>16</option>
+            <option value="32">32</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="iters">TTO Iterations <span class="value-pill" id="itersVal">50</span></label>
+          <input id="iters" type="range" min="0" max="100" value="50" />
+        </div>
+        <div class="control-group">
+          <label for="radius">Radius R <span class="value-pill" id="radiusVal">2</span></label>
+          <input id="radius" type="range" min="1" max="4" value="2" />
+        </div>
+        <div class="control-group">
+          <label for="lr">Learning Rate</label>
+          <input id="lr" type="number" step="0.0001" value="0.001" />
+        </div>
+        <div class="control-group">
+          <label>Feature Extractor</label>
+          <div class="value-pill">resnet18 layer2</div>
+        </div>
+        <div class="control-group">
+          <label for="segResolution">Mask2Former Resolution</label>
+          <select id="segResolution">
+            <option value="128">128</option>
+            <option value="192" selected>192</option>
+            <option value="256">256</option>
+          </select>
+        </div>
+        <div class="control-group toggle">
+          <input id="useGpu" type="checkbox" checked />
+          <label for="useGpu">Use GPU / MPS if available</label>
+        </div>
+        <div class="control-group toggle">
+          <input id="useMask2Former" type="checkbox" checked />
+          <label for="useMask2Former">Run Mask2Former (low-res)</label>
+        </div>
+        <button id="runBtn">Run Demo</button>
+        <div class="status" id="status">Waiting for input.</div>
+      </aside>
+
+      <section class="results">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tab-recon">Image Reconstruction</button>
+          <button class="tab-btn" data-tab="tab-feat">Feature Upsampling</button>
+          <button class="tab-btn" data-tab="tab-seg">Segmentation Upsampling</button>
+          <button class="tab-btn" data-tab="tab-params">Kernel Params</button>
+        </div>
+        <div class="metrics" id="metrics"></div>
+
+        <div class="tab-panel grid active" id="tab-recon">
+          <div class="card"><h4>HR Input</h4><img id="img-hr" /></div>
+          <div class="card"><h4>LR Input</h4><img id="img-lr" /></div>
+          <div class="card"><h4>LR -> HR (Bilinear)</h4><img id="img-lr-bilinear" /></div>
+          <div class="card"><h4>LR -> HR (Bicubic)</h4><img id="img-lr-bicubic" /></div>
+          <div class="card"><h4>Fixed JBU</h4><img id="img-fixed" /></div>
+          <div class="card"><h4>TTO Reconstruction</h4><img id="img-tto" /></div>
+          <div class="card"><h4>|TTO - HR|</h4><img id="img-err" /></div>
+        </div>
+
+        <div class="tab-panel grid" id="tab-feat">
+          <div class="card"><h4>LR Feature (PCA)</h4><img id="feat-lr" /></div>
+          <div class="card"><h4>Bilinear(F) (PCA)</h4><img id="feat-bilinear" /></div>
+          <div class="card"><h4>GS-JBU(F) (PCA)</h4><img id="feat-gsjbu" /></div>
+        </div>
+
+        <div class="tab-panel grid" id="tab-seg">
+          <div class="card"><h4>Mask2Former LR (nearest)</h4><img id="seg-lr" /></div>
+          <div class="card"><h4>Bilinear Seg</h4><img id="seg-bilinear" /></div>
+          <div class="card"><h4>GS-JBU Seg</h4><img id="seg-gsjbu" /></div>
+        </div>
+
+        <div class="tab-panel grid" id="tab-params">
+          <div class="card"><h4>sigma_x</h4><img id="param-sx" /></div>
+          <div class="card"><h4>sigma_y</h4><img id="param-sy" /></div>
+          <div class="card"><h4>theta</h4><img id="param-theta" /></div>
+          <div class="card"><h4>sigma_r</h4><img id="param-sr" /></div>
+        </div>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
