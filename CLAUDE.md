@@ -72,11 +72,12 @@
 - `pydantic`
 - `numpy`
 - `pillow`
-- `torch`（CPU/GPU）
+- `torch`（CPU/GPU/MPS）
+    - 运行在 Apple Silicon MPS 上时尽量利用加速
 - `torchvision`（可选，用于 resnet18 特征）
 - （可选）`scikit-learn`（PCA；也可自己用 torch SVD 实现以减少依赖）
 
-> 注意：Demo 要保证无 GPU 也能跑（速度会慢，但默认 256^2 + R=2 + iters=50 应可接受）。
+> 注意：Demo 要保证无 GPU/MPS 也能跑（速度会慢，但默认 256^2 + R=2 + iters=50 应可接受）。
 
 ### 3.2 文件结构（建议）
 ```
@@ -113,7 +114,7 @@ styles.css
 {
   "meta": {
     "H": 256, "W": 256, "stride": 16, "iters": 50, "radius": 2,
-    "device": "cuda" 
+    "device": "mps" 
   },
   "images": {
     "I_hr": "data:image/png;base64,...",
@@ -258,7 +259,7 @@ styles.css
 * Optimizer: `Adam`
 * `lr=1e-3`
 * `iters=50`（可调）
-* 设备：优先 `cuda`，否则 `cpu`
+* 设备：优先 `mps`，否则 `cpu`
 
 ### 5.3 性能实现要求（必须）
 
@@ -419,7 +420,7 @@ def render_gsjbu(V_lr, I_hr, I_lr, params, stride, R, chunk=16384):
   * `python app.py`
   * 浏览器打开 `http://127.0.0.1:8000`
 * 参数解释（stride/iters/radius）
-* 性能建议（GPU/减小分辨率/减小 R/减小 iters）
+* 性能建议
 * 常见问题：
 
   * 权重下载失败 -> 自动 fallback
